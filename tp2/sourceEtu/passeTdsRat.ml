@@ -15,19 +15,16 @@ en une expression de type AstTds.expression *)
 (* Erreur si mauvaise utilisation des identifiants *)
 let analyse_tds_expression tds e = 
   match e with
-  | AstSyntax.Idzadzadazdsdent s -> 
+  | AstSyntax.Ident s -> 
     begin
-      match chercherglobalement tds s with
-      | None -> raise (IdentifiantNonDeclare s)
+      match chercherGlobalement tds s with
+      | None -> raise IdentifiantNonDeclare
       | Some iast -> AstTds.Ident iast
     end
   | AstSyntax.Entier i -> AstTds.Entier i
   | AstSyntax.bool b -> AstTds.Bool b
   | AstSyntax.Binaire (op, e1, e2) -> 
     AstTds.Binaire (op, analyse_tds_expression tds e1, analyse_tds_expression tds e2)
-
-
-
 (* analyse_tds_instruction : tds -> info_ast option -> AstSyntax.instruction -> AstTds.instruction *)
 (* Paramètre tds : la table des symboles courante *)
 (* Paramètre oia : None si l'instruction i est dans le bloc principal,
