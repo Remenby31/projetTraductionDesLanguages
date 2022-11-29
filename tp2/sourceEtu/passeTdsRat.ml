@@ -32,24 +32,17 @@ let rec analyse_tds_expression tds e =
       match chercherGlobalement tds s with
       (* Si la fonction n'existe pas, on lève une exception *)
       | None -> raise (IdentifiantNonDeclare s)
-      (* Sinon, on vérifie que la fonction est bien une fonction*)
+      (* Si la fonction est bien une fonction, on renvoie la fonction astTds*)
       | Some iast ->
+        let i = info_ast_to_info iast in
         begin
-          match iast.info with
-          (* Si ce n'est pas une fonction, on lève une exception *)
-          | AstTds.Fonction _ -> 
-            (* On vérifie que le nombre d'arguments est correct *)
-            let nbArgs = List.length el in
-            let nbArgsAttendus = List.length iast.info.parametres in
-            (* Si le nombre d'arguments est incorrect, on lève une exception *)
-            if nbArgs /= nbArgsAttendus then
-              raise (NombreArgumentsIncorrect (s, nbArgs, nbArgsAttendus))
-            else
-              (* On vérifie que les arguments sont corrects *)
-              let el' = List.map (analyse_tds_expression tds) el in
-              AstTds.AppelFonction (iast, el')
+          match i with
+          (* Si la fonction n'est pas une fonction, on lève une exception *)
+          | InfoFun _ -> AstTds.AppelFonction (iast, List.map (analyse_tds_expression tds) el)
+          (* Si la fonction n'est pas une fonction, on lève une exception *)
           | _ -> raise (IdentifiantNonDeclare s)
         end
+     
     end
 
 (* analyse_tds_instruction : tds -> info_ast option -> AstSyntax.instruction -> AstTds.instruction *)
@@ -183,8 +176,26 @@ and analyse_tds_bloc tds oia li =
 (* Vérifie la bonne utilisation des identifiants et tranforme la fonction
 en une fonction de type AstTds.fonction *)
 (* Erreur si mauvaise utilisation des identifiants *)
-let analyse_tds_fonction maintds (AstSyntax.Fonction(t,n,lp,li))  =
-  failwith "TO DO"
+let analyse_tds_fonction maintds (AstSyntax.Fonction(t,n,lp,li)) =
+  let tds = creerTDSFille maintds in
+  (* Analyse des parametres*)
+  let nlp = List.map (fun (t,n) ->
+    match chercherLocalement tds n with
+    | None ->
+      (* Ajout dans la tds du parametre *)
+      ajouter tds n (info_to_info_ast (InfoVar (n,t,(getTaille t),"LB")));
+      (t,n)
+    | Some _ ->
+      (* L'identifiant est trouvé dans la tds locale,
+      il a donc déjà été déclaré dans le bloc courant *)
+      raise (DoubleDeclaration n)
+  ) lp in
+  (* Analyse du bloc *)
+  let nli = analyse_tds_bloc tds (Some (info_to_info_ast (InfoFun (t,n,lp)))) li in
+  AstTds.Fonction(t,n,nlp,nli)
+  (* Analyse des instructions*)
+  let nli = analyse_tds_bloc tds (Some (InfoFun (n,t))) li in
+  AstTds.Fonction(t,n,nlp,nli)
 
 (* analyser : AstSyntax.programme -> AstTds.programme *)
 (* Paramètre : le programme à analyser *)

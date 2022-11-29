@@ -18,7 +18,7 @@ let rec analyse_tds_expression tds e =
   | AstSyntax.Ident s -> 
     begin
       match chercherGlobalement tds s with
-      | None -> raise IdentifiantNonDeclare(s)
+      | None -> raise (IdentifiantNonDeclare s)
       | Some iast -> AstTds.Ident iast
     end
   | AstSyntax.Entier i -> AstTds.Entier i
@@ -28,18 +28,22 @@ let rec analyse_tds_expression tds e =
   | AstSyntax.Unaire (op, e) -> AstTds.Unaire (op, analyse_tds_expression tds e)
   | AstSyntax.AppelFonction (s, el) ->
     begin
+      (* On vérifie que la fonction existe *)
       match chercherGlobalement tds s with
-      | None -> raise IdentifiantNonDeclare
-      | Some iast -> 
+      (* Si la fonction n'existe pas, on lève une exception *)
+      | None -> raise (IdentifiantNonDeclare s)
+      (* Si la fonction est bien une fonction, on renvoie la fonction astTds*)
+      | Some iast ->
+        let i = info_ast_to_info iast in
         begin
-          match iast.info with
-          | AstTds.Fonction (t, l) -> 
-            let el' = List.map (analyse_tds_expression tds) el in
-            AstTds.AppelFonction (iast, el')
-          | _ -> raise IdentifiantNonFonction
+          match i with
+          (* Si la fonction n'est pas une fonction, on lève une exception *)
+          | InfoFun _ -> AstTds.AppelFonction (iast, List.map (analyse_tds_expression tds) el)
+          (* Si la fonction n'est pas une fonction, on lève une exception *)
+          | _ -> raise (IdentifiantNonDeclare s)
         end
+     
     end
-
 
 (* analyse_tds_instruction : tds -> info_ast option -> AstSyntax.instruction -> AstTds.instruction *)
 (* Paramètre tds : la table des symboles courante *)
@@ -172,8 +176,11 @@ and analyse_tds_bloc tds oia li =
 (* Vérifie la bonne utilisation des identifiants et tranforme la fonction
 en une fonction de type AstTds.fonction *)
 (* Erreur si mauvaise utilisation des identifiants *)
-let analyse_tds_fonction maintds (AstSyntax.Fonction(t,n,lp,li))  =
-  failwith "TO DO"
+let analyse_tds_fonction maintds (AstSyntax.Fonction(t,n,lp,li)) =
+  let tds = creerTDSFille maintds in
+  let nlp = List.map (analyse_tds_parametre tds) lp in
+  let nli = analyse_tds_bloc tds (Some (InfoFun (n,t))) li in
+  AstTds.Fonction(t,n,nlp,nli)
 
 (* analyser : AstSyntax.programme -> AstTds.programme *)
 (* Paramètre : le programme à analyser *)
