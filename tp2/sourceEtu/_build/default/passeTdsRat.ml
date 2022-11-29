@@ -13,19 +13,32 @@ type t2 = Ast.AstTds.programme
 (* Vérifie la bonne utilisation des identifiants et tranforme l'expression
 en une expression de type AstTds.expression *)
 (* Erreur si mauvaise utilisation des identifiants *)
-let analyse_tds_expression tds e = 
+let rec analyse_tds_expression tds e = 
   match e with
-  | AstSyntax.Idzadzadazdsdent s -> 
+  | AstSyntax.Ident s -> 
     begin
-      match chercherglobalement tds s with
-      | None -> raise (IdentifiantNonDeclare s)
+      match chercherGlobalement tds s with
+      | None -> raise IdentifiantNonDeclare(s)
       | Some iast -> AstTds.Ident iast
     end
   | AstSyntax.Entier i -> AstTds.Entier i
-  | AstSyntax.bool b -> AstTds.Bool b
+  | AstSyntax.Booleen b -> AstTds.Booleen b
   | AstSyntax.Binaire (op, e1, e2) -> 
     AstTds.Binaire (op, analyse_tds_expression tds e1, analyse_tds_expression tds e2)
-
+  | AstSyntax.Unaire (op, e) -> AstTds.Unaire (op, analyse_tds_expression tds e)
+  | AstSyntax.AppelFonction (s, el) ->
+    begin
+      match chercherGlobalement tds s with
+      | None -> raise IdentifiantNonDeclare
+      | Some iast -> 
+        begin
+          match iast.info with
+          | AstTds.Fonction (t, l) -> 
+            let el' = List.map (analyse_tds_expression tds) el in
+            AstTds.AppelFonction (iast, el')
+          | _ -> raise IdentifiantNonFonction
+        end
+    end
 
 
 (* analyse_tds_instruction : tds -> info_ast option -> AstSyntax.instruction -> AstTds.instruction *)
