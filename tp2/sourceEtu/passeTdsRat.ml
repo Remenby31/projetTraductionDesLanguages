@@ -177,25 +177,31 @@ and analyse_tds_bloc tds oia li =
 en une fonction de type AstTds.fonction *)
 (* Erreur si mauvaise utilisation des identifiants *)
 let analyse_tds_fonction maintds (AstSyntax.Fonction(t,n,lp,li)) =
-  let tds = creerTDSFille maintds in
-  (* Analyse des parametres*)
-  let nlp = List.map (fun (t,n) ->
-    match chercherLocalement tds n with
-    | None ->
-      (* Ajout dans la tds du parametre *)
-      ajouter tds n (info_to_info_ast (InfoVar (n,t,(getTaille t),"LB")));
-      (t,n)
-    | Some _ ->
-      (* L'identifiant est trouvé dans la tds locale,
-      il a donc déjà été déclaré dans le bloc courant *)
-      raise (DoubleDeclaration n)
-  ) lp in
-  (* Analyse du bloc *)
-  let nli = analyse_tds_bloc tds (Some (info_to_info_ast (InfoFun (t,n,lp)))) li in
-  AstTds.Fonction(t,n,nlp,nli)
-  (* Analyse des instructions*)
-  let nli = analyse_tds_bloc tds (Some (InfoFun (n,t))) li in
-  AstTds.Fonction(t,n,nlp,nli)
+  (*Ajout de la fonction dans la maintds *)
+  let type_parametre = List.map (fun (t,_) -> t) lp in
+  ajouter maintds n (info_to_info_ast (InfoFun (n, t, type_parametre)));
+  (* Création d'une tds locale pour la fonction *)
+  let tdsf = creerTDSFille maintds in
+  (* Analyser les parametres *)
+  let analyse_tds_parametre tdsf (t,n) =
+    begin
+      match chercherLocalement tdsf n with
+      | None ->
+        (* Ajout dans la tds du paramètre *)
+        ajouter tdsf n (info_to_info_ast (InfoVar (n,Undefined, 0, "")));
+        (* Renvoie du paramètre *)
+        (t,(info_to_info_ast (InfoVar (n,Undefined, 0, ""))))
+      | Some _ ->
+        (* L'identifiant est trouvé dans la tds locale,
+        il a donc déjà été déclaré dans le bloc courant *)
+        raise (DoubleDeclaration n)
+    end in
+  let nlp = List.map (analyse_tds_parametre tdsf) lp in
+  (* Analyser le bloc *)
+  let option_tdsf =  (info_to_info_ast (InfoFun (n,t, type_parametre))) in
+  let nli = analyse_tds_bloc tdsf (Some option_tdsf) li in
+  (* Renvoie de la fonction *)
+  AstTds.Fonction(t,option_tdsf,nlp,nli)
 
 (* analyser : AstSyntax.programme -> AstTds.programme *)
 (* Paramètre : le programme à analyser *)
