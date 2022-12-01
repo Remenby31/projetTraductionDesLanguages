@@ -280,6 +280,16 @@ let%test _ =
     chercherGlobalement tdsf "a" = None
 
 
+(* Fonction qui renvoie le type à partir d'un identifiant*)
+(* Renvoie un type typ*)
+let rec getType tds nom =
+  let iast = info_ast_to_info (chercherGlobalement tds nom) in
+  match iast with
+  | None -> failwith "Identifiant non déclaré"
+  | Some (InfoVar (_,t,_,_)) -> t
+  | Some (InfoConst (_,i)) -> Int
+  | Some (InfoFun (_,t,_)) -> t
+
 (* Convertie une info en une chaine de caractère - pour affichage *)
 let string_of_info info =
   match info with

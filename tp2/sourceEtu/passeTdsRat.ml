@@ -19,7 +19,14 @@ let rec analyse_tds_expression tds e =
     begin
       match chercherGlobalement tds s with
       | None -> raise (IdentifiantNonDeclare s)
-      | Some iast -> AstTds.Ident iast
+      | Some iast -> 
+        let i = info_ast_to_info iast in
+        begin
+          match i with
+            | InfoVar _ -> AstTds.Ident (iast)
+            | InfoConst _ -> AstTds.Ident (iast)
+            | _ -> raise (MauvaiseUtilisationIdentifiant s)
+        end
     end
   | AstSyntax.Entier i -> AstTds.Entier i
   | AstSyntax.Booleen b -> AstTds.Booleen b
@@ -40,9 +47,8 @@ let rec analyse_tds_expression tds e =
           (* Si la fonction n'est pas une fonction, on lève une exception *)
           | InfoFun _ -> AstTds.AppelFonction (iast, List.map (analyse_tds_expression tds) el)
           (* Si la fonction n'est pas une fonction, on lève une exception *)
-          | _ -> raise (IdentifiantNonDeclare s)
+          | _ -> raise (MauvaiseUtilisationIdentifiant s)
         end
-     
     end
 
 (* analyse_tds_instruction : tds -> info_ast option -> AstSyntax.instruction -> AstTds.instruction *)
