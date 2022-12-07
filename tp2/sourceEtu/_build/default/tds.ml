@@ -290,6 +290,8 @@ let getType iast =
     | (InfoFun (_,t,_)) -> t
 
 
+
+
 (* Convertie une info en une chaine de caractère - pour affichage *)
 let string_of_info info =
   match info with

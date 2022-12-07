@@ -12,6 +12,8 @@ exception TypeInattendu of typ * typ
 exception TypesParametresInattendus of typ list * typ list
 exception TypeBinaireInattendu of binaire * typ * typ (* les types sont les types réels non compatible avec les signatures connues de l'opérateur *)
 exception AffichageUndefined (* affichage d'un type non défini *)
+exception BooleenAttenduWhile (* le test d'un while doit être un booléen *)
+exception TypeInattenduRetour of typ (* le type réel du retour n'est pas compatible avec le type attendu *)
 
 (* Utilisation illégale de return dans le programme principal *)
 exception RetourDansMain
