@@ -290,7 +290,16 @@ let getType iast =
     | (InfoFun (_,t,_)) -> t
 
 
+(* Fonction qui renvoie le type des parametres d'une fonction à partir d'un identifiant*)
+(* Renvoie une liste de type typ*)
+let getParam iast =
+    (* Si l'identifiant est déclaré, on convertit l'info_ast en info *)
+    match (info_ast_to_info iast) with
+    | (InfoVar (_,_,_,_)) -> failwith "Erreur : l'identifiant n'est pas une fonction"
+    | (InfoConst (_,_)) -> failwith "Erreur : l'identifiant n'est pas une fonction"
+    | (InfoFun (_,_,lp)) -> lp
 
+(* Fonction qui renvoie le type des parametres d'une expression*)
 
 (* Convertie une info en une chaine de caractère - pour affichage *)
 let string_of_info info =

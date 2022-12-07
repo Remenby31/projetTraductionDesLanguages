@@ -174,7 +174,7 @@ and analyse_tds_bloc tds oia li =
    let nli = List.map (analyse_tds_instruction tdsbloc oia) li in
    (* afficher_locale tdsbloc ; *) (* décommenter pour afficher la table locale *)
    nli
-
+  
 
 (* analyse_tds_fonction : tds -> AstSyntax.fonction -> AstTds.fonction *)
 (* Paramètre tds : la table des symboles courante *)
