@@ -13,23 +13,22 @@ let rec getTypeExpression exp = match exp with
 | AstTds.Entier _ -> Int
 | AstTds.Booleen _ -> Bool
 | AstTds.AppelFonction (iast, _) -> getType iast
-| AstTds.Binaire (op, e1, e2) -> 
+| AstTds.Unaire _ -> Int
+| AstTds.Binaire (op, e1, e2) ->
 	begin
-  let t1 = getTypeExpression e1 in
-  let t2 = getTypeExpression e2 in
-	(*On teste si les deux expressions sont du même type*)
-  if t1 = t2 then 
-	match op with
-	| AstSyntax.Plus -> t1 (*on renvoie le type des expression*)
-	| AstSyntax.Mult -> t1  (*on renvoie le type des expression*)
-	| AstSyntax.Equ -> Bool (*C'est un test d'égalité, on renvoie un booleen*)
-	| AstSyntax.Inf -> Bool (*C'est un test d'infériorité, on renvoie un booleen*)
-	| AstSyntax.Fraction -> Rat (*C'est une fraction, on renvoie un rationnel*)
-		else raise (TypeBinaireInattendu (op, t1, t2)) (*les deux expressions ne sont pas du même type, on lève une exception*)
+		let t1 = getTypeExpression e1 in
+		let t2 = getTypeExpression e2 in
+		(*On teste si les deux expressions sont du même type*)
+		if t1 = t2 then 
+			match op with
+			| AstSyntax.Plus -> t1 (*on renvoie le type des expression*)
+			| AstSyntax.Mult -> t1  (*on renvoie le type des expression*)
+			| AstSyntax.Equ -> Bool (*C'est un test d'égalité, on renvoie un booleen*)
+			| AstSyntax.Inf -> Bool (*C'est un test d'infériorité, on renvoie un booleen*)
+			| AstSyntax.Fraction -> Rat (*C'est une fraction, on renvoie un rationnel*)
+		else raise (TypeBinaireInattendu (op, t1, t2)) (* les deux expressions ne sont pas du même type, on lève une exception *)
 	end
-| AstTds.Unaire (_, exp) -> getTypeExpression exp
-
-
+	
 
 let rec analyser_type_expression e =
 	match e with
@@ -49,35 +48,50 @@ let rec analyser_type_expression e =
 			raise (TypesParametresInattendus (lparamtype_attendu, lparamtype_recu))
 		(* Si le nombre de paramètres est différent, on lève une exception *)
 		with Invalid_argument _ -> raise (NombreParametresInattendus (List.length lparamtype_attendu, List.length lparamtype_recu))
-		(* Si ce n'est pas une fonction, on lève une exception *)
-		| _ -> failwith "Erreur : ce n'est pas une fonction" (* Normalement, deja traité avant *)
 		end
 	| AstTds.Binaire (op, e1, e2) -> 
 		begin
-			(* On vérifie que les types des expressions sont bien les mêmes *)
 			let t1 = getTypeExpression e1 in
 			let t2 = getTypeExpression e2 in
-			if (est_compatible t1 t2) then (* Si les types sont les mêmes *)
-				if (est_compatible t1 Int) then (* Si les type sont des entiers *)
-					AstType.Binaire (convertirBinaire op, analyser_type_expression e1, analyser_type_expression e2) (* Si les types sont les mêmes & des entiers, on renvoie l'expression *)
-				else 
-					raise (TypeInattendu (t1, Int)) (* Si ce n'est pas un entier, on lève une exception *)
-			else
-				raise (TypeBinaireInattendu (op, t1, t2)) (* Si les types sont différents, on lève une exception *)
-			(* On vérifie que le type de l'expression est bien un entier *)
-			end
+			let ne1 = analyser_type_expression e1 in
+			let ne2 = analyser_type_expression e2 in
+			(*On teste si les deux expressions sont correctes*)
+			match op with
+				| AstSyntax.Fraction -> (* On teste si c'est une fraction*)
+					if (est_compatible t1 Int) && (est_compatible t2 Int)
+						then AstType.Binaire (AstType.Fraction, ne1, ne2) (* Fraction Int*)
+					else raise (TypeInattendu (t1, Int))
+				| AstSyntax.Plus -> (* On teste si c'est une addition*)
+					if (est_compatible t1 Int) && (est_compatible t2 Int) (* Addition Int*)
+						then AstType.Binaire (AstType.PlusInt, ne1, ne2)
+					else if (est_compatible t1 Rat) && (est_compatible t2 Rat) (* Addition Rat*)
+						then AstType.Binaire (AstType.PlusRat, ne1, ne2)
+					else raise (TypeBinaireInattendu (op, t1, t2))
+				| AstSyntax.Mult ->  (* On teste si c'est une multiplication*)
+					if (est_compatible t1 Int) && (est_compatible t2 Int)
+						then AstType.Binaire (AstType.MultInt, ne1, ne2) (* Multiplication Int*)
+					else if (est_compatible t1 Rat) && (est_compatible t2 Rat) 
+						then AstType.Binaire (AstType.MultRat, ne1, ne2) (* Multiplication Rat*)
+					else raise (TypeBinaireInattendu (op, t1, t2))
+				| AstSyntax.Equ -> 
+					if ((est_compatible t1 Int) && (est_compatible t2 Int)) (* On teste si c'est un test d'égalité*)
+					then AstType.Binaire (AstType.EquInt, ne1, ne2) (* Test d'égalité Int*)
+					else if ((est_compatible t1 Bool) && (est_compatible t2 Bool))
+					then AstType.Binaire (AstType.EquBool, ne1, ne2) (* Test d'égalité Bool*)
+					else raise (TypeBinaireInattendu (op, t1, t2))
+				| AstSyntax.Inf -> 
+					if ((est_compatible t1 Int) && (est_compatible t2 Int)) (* On teste si c'est un test d'infériorité*)
+					then AstType.Binaire (AstType.Inf, ne1, ne2) (* Test d'infériorité Int*)
+					else raise (TypeBinaireInattendu (op, t1, t2))
+				end
 	| AstTds.Unaire (op, e) ->
 		begin
-			(* On différencie les différents opérateurs (unaire) *)
-			let nop = match op with
-			| AstSyntax.Numerateur -> AstType.Numerateur
-			| AstSyntax.Denominateur -> AstType.Denominateur
 		(* On vérifie que le type de l'expression est bien un entier *)
-		in let t = getTypeExpression e in
-		if (est_compatible t Int) then
-			AstType.Unaire (nop, analyser_type_expression e) (* Si c'est un entier, on renvoie l'expression *)
+		let t = getTypeExpression e in
+		if (est_compatible t Rat) then
+			AstType.Unaire (convertirUnaire op, analyser_type_expression e) (* Si c'est un entier, on renvoie l'expression *)
 		else
-			raise (TypeInattendu (Int, t)) (* Si ce n'est pas un entier, on lève une exception *)
+			raise (TypeInattendu (t, Rat)) (* Si ce n'est pas un entier, on lève une exception *)
 		end
 	
 
@@ -135,7 +149,7 @@ and analyser_type_instruction i =
 		else
 			raise (TypeInattendu (t, getTypeExpression exp)) (* Si les types sont différents, on lève une exception *)
 		end
-		| _ -> failwith "Instruction non supportée"
+		| Empty -> AstType.Empty
 
 let analysefonction (AstTds.Fonction (typ, iast, lparam, bloc)) = 
 	(* On vérifie que le type de la fonction est bien le même que celui de la fonction *)
