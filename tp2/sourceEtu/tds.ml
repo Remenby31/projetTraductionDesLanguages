@@ -282,13 +282,13 @@ let%test _ =
 
 (* Fonction qui renvoie le type à partir d'un identifiant*)
 (* Renvoie un type typ*)
-let rec getType tds nom =
-  let iast = info_ast_to_info (chercherGlobalement tds nom) in
-  match iast with
-  | None -> failwith "Identifiant non déclaré"
-  | Some (InfoVar (_,t,_,_)) -> t
-  | Some (InfoConst (_,i)) -> Int
-  | Some (InfoFun (_,t,_)) -> t
+let getType iast =
+    (* Si l'identifiant est déclaré, on convertit l'info_ast en info *)
+    match (info_ast_to_info iast) with
+    | (InfoVar (_,t,_,_)) -> t
+    | (InfoConst (_,_)) -> Int
+    | (InfoFun (_,t,_)) -> t
+
 
 (* Convertie une info en une chaine de caractère - pour affichage *)
 let string_of_info info =
@@ -355,5 +355,5 @@ let%test _ =
   match info_ast_to_info ia with
   | InfoVar ("x", Rat, 10 , "LB") -> true
   | _ -> false
-    
+
    

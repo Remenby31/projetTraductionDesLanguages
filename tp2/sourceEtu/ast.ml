@@ -184,3 +184,16 @@ type fonction = Fonction of Tds.info_ast * Tds.info_ast list * bloc
 type programme = Programme of fonction list * bloc
 
 end
+
+let convertirUnaire op =
+  match op with
+  | AstSyntax.Numerateur -> AstType.Numerateur
+  | AstSyntax.Denominateur -> AstType.Denominateur
+  
+let convertirBinaire op =
+  match op with
+  | AstSyntax.Fraction -> AstType.Fraction
+  | AstSyntax.Plus -> AstType.PlusInt
+  | AstSyntax.Mult -> AstType.MultInt
+  | AstSyntax.Equ -> AstType.EquInt
+  | AstSyntax.Inf -> AstType.Inf

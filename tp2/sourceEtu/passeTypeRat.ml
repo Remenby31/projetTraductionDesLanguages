@@ -13,51 +13,46 @@ let rec analyser_type_expression e =
 	| AstTds.Booleen b -> AstType.Booleen b
 	| AstTds.Ident iast -> AstType.Ident iast
 	| AstTds.AppelFonction (iast, le) -> AstType.AppelFonction (iast, List.map analyser_type_expression le)
-	| AstTds.Binaire (op, e1, e2) -> AstType.Binaire (op, analyser_type_expression e1, analyser_type_expression e2)
-	| AstTds.Unaire (op, e) -> AstType.Unaire (op, analyser_type_expression e)
+	| AstTds.Binaire (op, e1, e2) -> 
+		begin
+		let nop = match op with 
+		| AstSyntax.Fraction -> AstType.Fraction
+ 	 	| AstSyntax.Plus -> AstType.PlusInt
+  	| AstSyntax.Mult -> AstType.MultInt
+  	| AstSyntax.Equ -> AstType.EquInt
+  	| AstSyntax.Inf -> AstType.Inf
+			in AstType.Binaire (nop, analyser_type_expression e1, analyser_type_expression e2)
+		end
+	| AstTds.Unaire (op, e) ->
+		begin
+			let nop = match op with
+			| AstSyntax.Numerateur -> AstType.Numerateur
+			| AstSyntax.Denominateur -> AstType.Denominateur
+		in AstType.Unaire (nop, analyser_type_expression e)
+	end
 
 
 let rec analyser_type_bloc li = List.map analyser_type_instruction li
 (* AstTds.contructeur -> ASTType.instructeur*)
 and analyser_type_instruction i =
 	match i with
-		AstTds.Declaration (t, rast, exp) ->
-			let (te, ne) = analyser_type_expression exp in
-			if (t = te)
-				then modifier_type_variable t rast;
-					ASTType.Declaration (rast, ne)
-				else raise TypeInattendu (t, te)
-		AstTds.Affectation (rast, exp) ->
-			let t = getType rast in
-			let (te, ne) = analyser_type_expression exp in
-			if (t = te)
-				then ASTType.Affectation(rast,exp)
-				else raise TypeInattendu
-			end if;
-		AstTds.Affichage(rast, exp) ->
-		let (te, ne) = analyser_type_expression exp in
-			match te with
-				Int -> AffichageInt ne
-				Rat -> AffichageRat ne
-				Bool -> AffichageBool ne
-				_ -> failwith "Erreur interne"
-		AstTds.Conditionnelle(c, bt, be) ->
-			let analyser_type_expression c in
-				if (tc = Bool)
-					then let nbt = analyser_type_bloc bt in
-						let nbe = analyser_type_bloc bt in
-						let nbe = analyser_type_bloc be in
-						ASTType.Conditionnelle(nc, nbt, nbe)
-		AstTds.Retour(inst, exp)->
-				let t = getTypeRetour inst in
-				let (te, ne ) = analyser_type_instruction
-				if (t = te)
-					then ASTType.Retour(inst, ne)
-					else raise TypeInattendu...
+	| AstTds.Declaration (typ, iast, exp) ->
+		let t = getType iast in
+			if (est_compatible t typ) then
+				AstType.Declaration (iast, analyser_type_expression exp)
+			else
+				raise (TypeInattendu (t, typ))
+	| AstTds.Affectation (iast, exp) -> AstType.Affectation (iast, analyser_type_expression exp)
+	| AstTds.Affichage (exp) -> failwith "not implemented"
+	| AstTds.Conditionnelle (exp, li1, li2) -> AstType.Conditionnelle (analyser_type_expression exp, analyser_type_bloc li1, analyser_type_bloc li2)
+	| AstTds.TantQue (exp, li) -> failwith "not implemented"
+	| AstTds.Retour (exp, iast) -> AstType.Retour (analyser_type_expression exp, iast)
+	| AstTds.Empty -> Empty
+
 
 
 let analyser (AstTds.Programme (lf, b)) = 
 	let mlf = analyser_type_fonction lf in
 		let nb = analyser_type_bloc b in
-			AST Type.Programme (nlf, nb)
+			AstType.Programme (nlf, nb)
 						

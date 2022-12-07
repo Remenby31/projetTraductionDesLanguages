@@ -280,6 +280,16 @@ let%test _ =
     chercherGlobalement tdsf "a" = None
 
 
+(* Fonction qui renvoie le type à partir d'un identifiant*)
+(* Renvoie un type typ*)
+let getType iast =
+    (* Si l'identifiant est déclaré, on convertit l'info_ast en info *)
+    match (info_ast_to_info iast) with
+    | (InfoVar (_,t,_,_)) -> t
+    | (InfoConst (_,_)) -> Int
+    | (InfoFun (_,t,_)) -> t
+
+
 (* Convertie une info en une chaine de caractère - pour affichage *)
 let string_of_info info =
   match info with
@@ -345,5 +355,5 @@ let%test _ =
   match info_ast_to_info ia with
   | InfoVar ("x", Rat, 10 , "LB") -> true
   | _ -> false
-    
+
    
