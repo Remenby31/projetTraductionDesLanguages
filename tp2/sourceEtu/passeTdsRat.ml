@@ -71,7 +71,7 @@ let rec analyse_tds_instruction tds oia i =
             (* et obtention de l'expression transformée *)
             let ne = analyse_tds_expression tds e in
             (* Création de l'information associée à l'identfiant *)
-            let info = InfoVar (n,Undefined, 0, "") in
+            let info = InfoVar (n,t, 0, "") in
             (* Création du pointeur sur l'information *)
             let ia = info_to_info_ast info in
             (* Ajout de l'information (pointeur) dans la tds *)
@@ -197,9 +197,9 @@ let analyse_tds_fonction maintds (AstSyntax.Fonction(t,n,lp,li)) =
         match chercherLocalement tdsf n with
         | None ->
           (* Ajout dans la tds du paramètre *)
-          ajouter tdsf n (info_to_info_ast (InfoVar (n,Undefined, 0, "")));
+          ajouter tdsf n (info_to_info_ast (InfoVar (n,t, 0, "")));
           (* Renvoie du paramètre *)
-          (t,(info_to_info_ast (InfoVar (n,Undefined, 0, ""))))
+          (t,(info_to_info_ast (InfoVar (n,t, 0, ""))))
         | Some _ ->
           (* L'identifiant est trouvé dans la tds locale,
           il a donc déjà été déclaré dans le bloc courant *)

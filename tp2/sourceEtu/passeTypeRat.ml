@@ -29,7 +29,7 @@ let rec analyser_type_expression e =
 
 	| AstTds.Booleen b -> AstType.Booleen b
 
-	| AstTds.Ident iast -> AstType.Ident iast
+	| AstTds.Ident iast -> AstType.Ident iast (* On renvoie le type de la variable *)
 
 	| AstTds.AppelFonction (iast, le) -> 
 		
@@ -78,14 +78,14 @@ let rec analyser_type_expression e =
 
 				| AstSyntax.Equ ->  (* Si c'est un test d'égalité*)
 					if ((est_compatible t1 Int) && (est_compatible t2 Int))
-					then AstType.Binaire (AstType.EquInt, ne1, ne2) (* Test d'égalité Int*)
+						then AstType.Binaire (AstType.EquInt, ne1, ne2) (* Test d'égalité Int*)
 					else if ((est_compatible t1 Bool) && (est_compatible t2 Bool))
-					then AstType.Binaire (AstType.EquBool, ne1, ne2) (* Test d'égalité Bool*)
+						then AstType.Binaire (AstType.EquBool, ne1, ne2) (* Test d'égalité Bool*)
 					else raise (TypeBinaireInattendu (op, t1, t2))
 
 				| AstSyntax.Inf -> (* Si c'est un test d'infériorité*)
 					if ((est_compatible t1 Int) && (est_compatible t2 Int)) 
-					then AstType.Binaire (AstType.Inf, ne1, ne2) (* Test d'infériorité Int*)
+						then AstType.Binaire (AstType.Inf, ne1, ne2) (* Test d'infériorité Int*)
 					else raise (TypeBinaireInattendu (op, t1, t2))
 				end
 
@@ -106,7 +106,7 @@ let rec analyser_type_expression e =
 	
 
 (* AstTds.programme -> ASTType.programme *)
-let rec analyser_type_bloc li = List.map analyser_type_instruction li
+let rec analyser_type_bloc li = List.map analyser_type_instruction li 
 
 (* AstTds.contructeur -> ASTType.instructeur*)
 and analyser_type_instruction i =
@@ -203,10 +203,20 @@ let analysefonction (AstTds.Fonction (typ, iast, lparam, bloc)) =
 	begin
 		(* On modifie les types dans paramestre dans leur iast *)
 		let nlparam = List.map (fun (typv, iastv) -> modifier_type_variable typv iastv ; iastv) lparam in
-
+		
 		(* On récupère les types des paramètres *)
 		let type_param = List.map (fun (typv, _) -> typv) lparam in
-		
+
+		(*
+		let f_verif t =
+			if t = Undefined then
+				failwith "Erreeeeeeeeuuuuuuuuuurrrrrrrr"
+			else
+				()
+
+		in let _ = List.map f_verif type_param in
+		*)
+
 		(* On vérifie que le type de retour est correct *)
 		let nbloc = analyser_type_bloc bloc in 
 		
