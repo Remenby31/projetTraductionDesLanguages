@@ -295,9 +295,9 @@ let getType iast =
 let getParam iast =
     (* Si l'identifiant est déclaré, on convertit l'info_ast en info *)
     match (info_ast_to_info iast) with
-    | (InfoVar (_,_,_,_)) -> failwith "Erreur : l'identifiant n'est pas une fonction"
-    | (InfoConst (_,_)) -> failwith "Erreur : l'identifiant n'est pas une fonction"
     | (InfoFun (_,_,lp)) -> lp
+    | _ -> failwith "Erreur : l'identifiant n'est pas une fonction"
+    
 
 (* Fonction qui renvoie le type des parametres d'une expression*)
 
