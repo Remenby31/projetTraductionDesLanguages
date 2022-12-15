@@ -379,4 +379,15 @@ let%test _ =
   let ia = info_to_info_ast info in
   get_adresse_variable ia = (4,"SB")
 
+(* Renvoie le nom de la fonction*)
+let get_nom_fonction ia =
+  let i = info_ast_to_info ia in
+     match i with
+     |InfoFun (n,_,_) -> n
+     | _ -> failwith "Appel get_nom_fonction pas sur un InfoFun"
+
+let%test _ =
+  let info = InfoFun ("f", Rat, [Int ; Int]) in
+  let ia = info_to_info_ast info in
+  get_nom_fonction ia = "f"
    

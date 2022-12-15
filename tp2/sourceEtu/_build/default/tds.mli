@@ -71,3 +71,6 @@ val getParam : info_ast -> typ list
 (* Récupère l'adresse de l'iast*)
 val get_adresse_variable : info_ast -> int * string
 
+(* Récupère le nom de la fonction *)
+val get_nom_fonction : info_ast -> string
+
