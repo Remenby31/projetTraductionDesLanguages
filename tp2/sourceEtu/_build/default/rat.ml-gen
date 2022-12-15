@@ -25,11 +25,10 @@ module Parser = Rat__Parser
 (** @canonical Rat.Passe *)
 module Passe = Rat__Passe
 
-<<<<<<< Updated upstream
-=======
+
 (** @canonical Rat.PasseCodeRatToTam *)
 module PasseCodeRatToTam = Rat__PasseCodeRatToTam
->>>>>>> Stashed changes
+
 
 (** @canonical Rat.PassePlacementRat *)
 module PassePlacementRat = Rat__PassePlacementRat
