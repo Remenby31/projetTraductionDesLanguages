@@ -6,7 +6,8 @@ type t1 = Ast.AstType.programme
 type t2 = Ast.AstPlacement.programme
 
 
-
+(* modifier_adresse_variable : int -> string -> AstType.ident -> unit *)
+(* Modifie l'adresse d'une variable dans la table des symboles *)
 let rec analyse_placement_bloc li reg depl =
   match li with
     | [] -> ([],0)
@@ -15,7 +16,8 @@ let rec analyse_placement_bloc li reg depl =
       let (nq, taille_q) = analyse_placement_bloc q reg (depl + taille) in
       (ni::nq, taille + taille_q)
 
-
+(* analyser_placement_instruction : AstType.instruction -> AstPlacement.instruction *)
+(* Analyse une instruction et place les variables dans la mémoire *)
 and analyser_placement_instruction i reg depl =
   match i with
     |AstType.Declaration(iast, exp) ->
@@ -40,11 +42,25 @@ and analyser_placement_instruction i reg depl =
       (AstPlacement.Retour(exp, getTaille (getType iast), taille_param), 0)
     |AstType.Empty -> (AstPlacement.Empty,0)
 
+(* analyser_placement_fonction : AstType.fonction -> AstPlacement.Fonction *)
+(* Analyse une fonction et place les variables dans la mémoire *)
 and analyser_placement_fonction (AstType.Fonction (iast, iast_param, b)) =
-  let nb = analyse_placement_bloc b "SB" 0 in
+  (* On place les paramètres de la fonction *)
+  let rec placer_variable_param li depl =
+    begin
+      match li with
+        | [] -> ()
+        | i::q -> 
+          modifier_adresse_variable depl "LB" i;
+          placer_variable_param q (depl + getTaille (getType i))
+    end
+  in
+  let nb = analyse_placement_bloc b "LB" 3 in
+  placer_variable_param iast_param 0;
   AstPlacement.Fonction(iast, iast_param, nb)
 
-
+(* analyser : AstType.programme -> AstPlacement.Programme *)
+(* Analyse le programme et place les variables dans la mémoire *)
 let analyser (AstType.Programme (lf, b)) = 
   let nlf = List.map (analyser_placement_fonction) lf in
   let nb = analyse_placement_bloc b "SB" 0 in

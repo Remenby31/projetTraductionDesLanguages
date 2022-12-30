@@ -5,7 +5,7 @@ open Tds
 open Type
 
 type t1 = Ast.AstPlacement.programme
-type t2 = String
+type t2 = string
 
 (*Analyse l'expression*)
 (*Renvoie le code Tam correspondant*)
@@ -13,7 +13,6 @@ let rec analyser_code_expression exp =
 	match exp with
 		|AstType.AppelFonction (ia, le) ->
 			(* On analyse les arguments *)
-			
 			let rec analyser_liste_expression le =
 				begin
 				match le with
@@ -50,19 +49,19 @@ let rec analyser_code_expression exp =
 			(match op with
 				|AstType.Fraction -> "" (*On ne fait rien car la fraction est déjà sur la pile*)
 				|AstType.PlusInt -> (*On fait l'addition*)
-					(call ("SB") "IAdd")
+					(call "SB" "IAdd")
 				|AstType.PlusRat -> (*On fait l'addition*)
-					(call ("SB") "RAdd")
+					(call "SB" "RAdd")
 				|AstType.MultInt ->  (*On fait la multiplication*)
-					(call ("SB") "IMult")
+					(call "SB" "IMult")
 				|AstType.MultRat -> (*On fait la multiplication*)
-					(call ("SB") "RMult")
+					(call "SB" "RMult")
 				|AstType.EquInt -> (*On fait la comparaison*)
-					(call ("SB") "IEq")
+					(call "SB" "IEq")
 				|AstType.EquBool -> (*On fait la comparaison*)
-					(call ("SB") "BEq")
+					(call "SB" "BEq")
 				|AstType.Inf -> (*On fait la comparaison*)
-					(call ("SB") "ILt")
+					(call "SB" "ILt")
 			)
 
 		
@@ -116,13 +115,13 @@ and analyser_code_instruction i =
 
 			(analyser_code_expression exp)
 			^
-			(subr "Bout")
+			(subr "BOut")
 
 		|AstPlacement.AffichageRat (exp) ->
 
 			(analyser_code_expression exp)
 			^
-			(call ("SB") "ROut")
+			(call "SB" "ROut")
 
 		|AstPlacement.TantQue(exp, b) -> 
 
@@ -133,7 +132,7 @@ and analyser_code_instruction i =
 			^
 			analyser_code_expression exp
 			^
-			jumpif (0) lf
+			jumpif 0 lf
 			^
 			analyser_code_bloc b
 			^
