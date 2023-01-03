@@ -51,8 +51,9 @@ and analyser_placement_fonction (AstType.Fonction (iast, iast_param, b)) =
       match li with
         | [] -> ()
         | i::q -> 
-          modifier_adresse_variable depl "LB" i;
-          placer_variable_param q (depl + getTaille (getType i))
+          let ndepl = depl - getTaille (getType i) in
+          modifier_adresse_variable ndepl "LB" i;
+          placer_variable_param q ndepl
     end
   in
   let nb = analyse_placement_bloc b "LB" 3 in
