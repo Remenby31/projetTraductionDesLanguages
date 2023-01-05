@@ -51,12 +51,13 @@ and analyser_placement_fonction (AstType.Fonction (iast, iast_param, b)) =
       match li with
         | [] -> ()
         | i::q -> 
-          modifier_adresse_variable depl "LB" i;
-          placer_variable_param q (depl + getTaille (getType i))
+          let ndepl = depl - getTaille (getType i) in
+          modifier_adresse_variable ndepl "LB" i;
+          placer_variable_param q ndepl
     end
   in
   let nb = analyse_placement_bloc b "LB" 3 in
-  placer_variable_param iast_param 0;
+  placer_variable_param (List.rev iast_param) 0;
   AstPlacement.Fonction(iast, iast_param, nb)
 
 (* analyser : AstType.programme -> AstPlacement.Programme *)

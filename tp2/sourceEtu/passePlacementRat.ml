@@ -57,7 +57,7 @@ and analyser_placement_fonction (AstType.Fonction (iast, iast_param, b)) =
     end
   in
   let nb = analyse_placement_bloc b "LB" 3 in
-  placer_variable_param iast_param 0;
+  placer_variable_param (List.rev iast_param) 0;
   AstPlacement.Fonction(iast, iast_param, nb)
 
 (* analyser : AstType.programme -> AstPlacement.Programme *)
