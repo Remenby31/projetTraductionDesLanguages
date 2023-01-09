@@ -99,21 +99,21 @@ let%test "test8_f_a" =
   test (pathFichiersRat^"test8.rat")  "f" ("a",1)  (-1, "LB")
     
 let%test "test9_f_a" = 
-  test (pathFichiersRat^"test9.rat")  "f" ("a",1)  (-1, "LB") (*ici*)
+  test (pathFichiersRat^"test9.rat")  "f" ("a",1)  (-1, "LB")
 
 let%test "test10_f_a" = 
-  test (pathFichiersRat^"test10.rat")  "f" ("a",1)  (-2, "LB") (*ici*)
+  test (pathFichiersRat^"test10.rat")  "f" ("a",1)  (-2, "LB")
 
 let%test "test11_f_a" = 
-  test (pathFichiersRat^"test11.rat")  "f" ("a",1)  (-1, "LB") (*ici*)
+  test (pathFichiersRat^"test11.rat")  "f" ("a",1)  (-1, "LB")
     
 let%test "test12_f_b" = 
-  test (pathFichiersRat^"test12.rat")  "f" ("b",1)  (-4, "LB") (*ici*)
+  test (pathFichiersRat^"test12.rat")  "f" ("b",1)  (-4, "LB")
     
 let%test "test12_f_r" = 
-  test (pathFichiersRat^"test12.rat")  "f" ("r",1)  (-3, "LB") (*ici*)
+  test (pathFichiersRat^"test12.rat")  "f" ("r",1)  (-3, "LB")
     
 let%test "test12_f_i" = 
-  test (pathFichiersRat^"test12.rat")  "f" ("i",1)  (-1, "LB") (*ici*)
+  test (pathFichiersRat^"test12.rat")  "f" ("i",1)  (-1, "LB")
   
 

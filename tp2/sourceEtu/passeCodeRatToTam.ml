@@ -64,7 +64,9 @@ let rec analyser_code_expression exp =
 					(call "SB" "ILt")
 			)
 
-		
+
+
+
 let rec analyser_code_bloc (li, taillebloc) =
 		let rec analyser_liste_instruction li =
 			begin
@@ -128,7 +130,7 @@ and analyser_code_instruction i =
 			let ld = getEtiquette() in (*Etiquette de début de la boucle*)
 			let lf = getEtiquette() in (*Etiquette de fin de la boucle*)
 
-			(ld)
+			ld ^ "\n"
 			^
 			analyser_code_expression exp
 			^
@@ -138,7 +140,7 @@ and analyser_code_instruction i =
 			^
 			jump ld
 			^
-			lf
+			lf ^ "\n"
 		|AstPlacement.Conditionnelle(exp, ba, be) ->
 			let lfin = getEtiquette() in (*Etiquette de fin de la conditionnelle*)
 			let lelse = getEtiquette() in (*Etiquette de fin de la conditionnelle*)
@@ -150,11 +152,11 @@ and analyser_code_instruction i =
 			^
 			jump lfin
 			^
-			lelse
+			lelse ^ "\n"
 			^
 			analyser_code_bloc be
 			^
-			lfin
+			lfin ^ "\n"
 		
 		| AstPlacement.Retour(exp, tailleRetour, tailleParam) ->
 			analyser_code_expression exp
@@ -162,3 +164,12 @@ and analyser_code_instruction i =
 			(*^ || Il faudrait dépiler les variables à la fonction Mais le return s'en charge.*)
 			return (tailleRetour) tailleParam
 		| AstPlacement.Empty -> ""
+
+let analyser_code_fonction (AstPlacement.Fonction (_, _, b)) =
+	(* On recupere les parametres de la fonction *)
+	let lb = getEtiquette() in 
+	let nb = analyser_code_bloc b in
+	lb ^ "\n" 
+	^
+	nb
+
