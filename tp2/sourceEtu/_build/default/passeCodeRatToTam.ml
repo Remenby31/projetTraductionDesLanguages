@@ -173,3 +173,18 @@ let analyser_code_fonction (AstPlacement.Fonction (_, _, b)) =
 	^
 	nb
 
+let analyser (AstPlacement.Programme (li, b)) =
+	let rec analyser_liste_fonction li =
+		begin
+		match li with
+			|[] -> ""
+			|t::q -> 
+				(analyser_code_fonction t)
+				^
+				(analyser_liste_fonction q)
+		end
+		in
+	(analyser_code_bloc b)
+	^
+	(analyser_liste_fonction li)
+
