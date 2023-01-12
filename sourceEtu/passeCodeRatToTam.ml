@@ -78,11 +78,13 @@ let rec analyser_code_bloc (li, taillebloc) =
 					(analyser_liste_instruction q)
 			end
 			in
+		(*On empile la taille du bloc*)
 		(push taillebloc)
 	^
 		(*Traiter les instructions de li*)
 		(analyser_liste_instruction li)
 	^
+		(*On dépile la taille du bloc*)
 		(pop (0) taillebloc)
 
 and analyser_code_instruction i =
@@ -161,7 +163,7 @@ and analyser_code_instruction i =
 		| AstPlacement.Retour(exp, tailleRetour, tailleParam) ->
 			analyser_code_expression exp
 			^
-			(*^ || Il faudrait dépiler les variables à la fonction Mais le return s'en charge.*)
+			(*^ || Il faudrait dépiler les variables à la fonction mais le return s'en charge.*)
 			return (tailleRetour) tailleParam
 		| AstPlacement.Empty -> ""
 
@@ -184,7 +186,18 @@ let analyser (AstPlacement.Programme (li, b)) =
 				(analyser_liste_fonction q)
 		end
 		in
+	(*On met les entete du programme*)
+	(getEntete ())
+	^
+	(*On analyse les fonctions*)
+	(analyser_liste_fonction li)
+	^
+	(*On met le bloc principal*)
+	"main\n"
+	^
+	(*On analyse le bloc principal*)
 	(analyser_code_bloc b)
 	^
-	(analyser_liste_fonction li)
+	(*On termine par un halt*)
+	(halt)
 
